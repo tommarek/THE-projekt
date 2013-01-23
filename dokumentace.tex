@@ -1,0 +1,319 @@
+\documentclass[12pt,a4paper,titlepage,final]{article}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage[bookmarksopen,colorlinks,plainpages=false,urlcolor=blue,linkcolor=black]{hyperref}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{dsfont}
+\usepackage{caption}
+
+\usepackage[dvips]{graphicx}
+\usepackage[top=3cm, left=3cm, text={15cm, 24cm}, ignorefoot]{geometry}
+
+\newcounter{defcounter} \setcounter{defcounter}{0}
+\newenvironment{definition}[1][Definice]{\begin{trivlist}
+\item[\hskip \labelsep \refstepcounter{defcounter} {\bfseries #1} {\bfseries \arabic{defcounter}}.]}{\end{trivlist}}
+
+\newenvironment{theorem}[1][Věta]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\hfill \mbox{\raggedright \rule{.07in}{.1in}}}
+\newenvironment{proof}{\vspace{1ex}\noindent{\bf Proof}\hspace{0.5em}}{\hfill\qed\vspace{1ex}}
+
+\begin{document}
+\begin{titlepage}
+% titulna strnka
+\begin{center}
+
+    \vspace{5mm}
+    {\LARGE \bf \sc \MakeUppercase{Fakulta informačních technologií} }\\[5mm]%
+    {\Large \bf \sc \MakeUppercase{Vysoké učení technické v Brně} }\\[5mm]%
+    \vspace{10mm}
+\begin{figure}[h]
+    \begin{center}
+      \includegraphics[width=4cm,keepaspectratio]{img/logo}
+    \end{center}
+\end{figure}
+\vspace{20mm}
+{\Huge \bfseries Projekt do předmětu THE}\\[5mm]
+{\Large Bayesovské hry}
+
+\vfill
+\vfill
+\begin{flushleft}
+    Tomáš Marek - xmarek11 \hfill \today 
+\end{flushleft}
+\end{center}
+
+\end{titlepage}
+
+\newpage
+
+\tableofcontents
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\newpage
+
+\section {Úvod} \label{uvod}
+Cílem toho to projektu je vytvořit krátký přehled problematiky Bayesovských her, tedy her s~neúplnou informací.
+Tato problematika je velmi zajímavou, a to nejen z~hlediska teorie her jako vědy, ale také z~hlediska možné aplikace na reálné problémy skutečného světa, ve kterém je řešení problémů při nedostatku, nebo nekompletnosti informací velmi častou praxí.
+Uveďme několik příkladů:
+\begin{itemize}
+ \item V~aukcích neznají zpravidla jednotliví dražitelé hodnocení všech dražených položek všemi ostatními dražiteli
+ \item Při přijímání nových zaměstnanců zaměstnavatel nezná schopnosti uchazečů o~zaměstnání
+ \item V~Cournotově modelu oligopolu nemusejí jednotliví oligopolisté znát nákladové struktury ostatních oligopolistů(ukázka tohoto problému bude řešena jako příklad)
+ \item Postoje jednotlivých hráčů k~riziku nemusí být všeobecně známé
+\end{itemize}
+Ukážeme si, jakým způsobem fungují Bayesovské hry, co jsou a jak najít ekvilibria ve hře.
+
+Teorii Bayesovských her poprvé představil Maďarsko--americký ekonom John Harsanyi ve své publikaci \textit{Games with Incomplete Information Played by "Bayesian"}\cite{Harsanyi2004}.
+Za tuto teorii v~roce 1994 získal Nobelovu cenu za "průkopnickou analýzu ekvilibrií v~teorii nekooperativních her"\footnote{\url{http://www.nobelprize.org/nobel_prizes/economics/laureates/1994/harsanyi.html}}.
+
+Úvodem této práce bychom měli ještě zmínit, že notace, nadále používaná v~této práci, vychází z~notace používané panem PhD. Martinem Hrubým Ing. při výuce předmětu \textit{Teorie her} na Fakultě informatiky Vysokého učení technického v~Brně.
+
+\section{Bayesovské hry}
+
+Bayesovské hry jsou nekooperativní hry v~normální formě, ve kterých hráči, jak již bylo zmíněno v~úvodu, nemají kompletní informace o~hře -- mají určitou nejistotu například o~užitkových funkcích, o~možných strategiích ostatních hráčů atd.
+Tato vlastnost Bayesovských her je aspektem, jenž se nedá v~teorii her pomocí běžně používaných přístupů příliš dobře simulovat a řešit.
+
+Dle Harsanyiho můžeme rozdělit hry na \textit{hry s~kompletní informací}, občas nazývány C--games a \textit{hry s~nekompletní informací}, také nazývány I--games\footnote{Hry s~kompletní informací a hry s~nekompletní informací (tedy C--games a I--games) by se neměly zaměňovat se hrami s~dokonalou a nedokonalou informací (games with incomplete information a games with imperfect information). Rozdělení her na C--games a I--games se vztahuje vzhledem ke znalostem jednotlivých hráčů o~hře, na druhou stranu rozdělení her na hry s~dokonalou a nedokonalou informací se vztahují ke množství informací, které hráč má o~ostatních hráčích (histiorii jejich tahů atd.). Na rozdíl od her s~nekompletní informací jsou hry s~nedokonalou informací velmi dobře dokumentovány v~literatuře.}.
+Hry s~nekompletní informací jsou význačné tím, že na rozdíl od her s~kompletní informací, chybí hráčům kompletní informace o~hrané hře.
+Hráči například nemají informace o~užitkových funkcích jiných hráčů, o~strategiích ostatních hráčů, ale může se také stát, že nemají úplné informace sami o~sobě, kupříkladu neznají svou užitkovou funkci.
+Obor teorie her se téměř výhradně zabývá jenom hrami s~kompletními informacemi a to i přesto, že ve skutečné ekonomice, politice, ve vojenství a v~dalších životních situacích je neznalost faktů a i přes to nutnost řešení problémů velmi častá.
+
+Harsanyi ve své práci dále tvrdí, že důvodem, proč se historicky odborníci oboru teorie her příliš nezabývali hrami s~nekompletní informací byla zdánlivá nekonečnost modelů her, způsobena vzájemnými očekáváními hráčů.
+Tuto vlastnost si představme na příkladě hry dvou hráčů ($H_1$ a $H_2$), ve které každý hráč zná svoji vlastní užitkovou funkci, ale nezná užitkovou funkci protihráče.
+V~takovéto hře by hráč $H_1$ volil strategii v~závislosti na tom, jakou by očekával užitkovou funkci $u_2$ hráče $H_2$.
+Tomuto očekávání se také říká očekávání první třídy (first-order expectation).
+Volba jeho strategie hráče $H_1$ ale nebude záviset pouze na jeho vlastním očekávání prvního řádu, ale také na očekávání prvního řádu hráče $H_2$ snažícího se odhadnout užitkovou funkci hráče $H_1$.
+Tomuto očekávání zabývajícím se očekáváními prvního řádu se říká očekávání druhého řádu (second-order expectation).
+Takto to pokrčuje dál, tedy strategie volená hráčem $H_1$ bude také záviset na jeho očekávání, jaké bude očekávání druhého řádu hráče $H_2$.
+Tomuto se tedy říká očekávání třetího řádu.
+Tento postup by takto mohl pokračovat do nekonečna.
+Stejným způsobem potom bude hráč $H_2$ určovat svoji strategii, tedy v~závislosti na svých očekáváních prvního řádu, druhého řádu, třetího řádu atd. až do nekonečna.
+Tomuto modelu her s~nekompletní informací se říká \textit{model sekvenčních očekávání} (sequential exectations model).
+
+V~Bayesovských hrách má každý hráč vlastní subjektivní pravděpodobnostní rozdělení pro charakteristické informace ostatních hráčů, které jsou mu neznámé.
+Harsanyi ve své publikaci navrhl pro řešení Bayesovských her používat přírody (v~teorii her je příroda používá pro neinteligentního hráče jednajícího zcela náhodně) pro přiřazování typů hráčům na základě základního pravděpodobnostního rozložení (viz dále) a převést tak hru s~nekompletními informacemi na hru se sice nedokonalými, ale kompletními informacemi.
+V~Bayesovských hrách existuje takzvané základní pravděpodobnostní rozložení (basic probablity distribution)\cite{Harsanyi2004} určující charakteristiky hráčů tedy užitkovou funkci.
+Kompletní soukromé informace každého hráče definují jeho typ.
+Každý hráč má o~sobě kompletní informace (zná svoji užitkovou funkci, možnosti, atd.), a tedy zná svůj vlastní typ.
+Typy ostatních hráčů jsou však hráči neznámé.
+Jelikož však každý hráč zná také základní pravděpodobnostní rozložení, může si tedy vytvořit vlastní předpoklady o~typech ostatních hráčů a podle těchto předpokladů následně hrát. 
+
+\subsection{Bayesovská hra}
+\begin{definition}
+ \textbf{Bayesovské hra} -- Bayesovská hra $H$ je určena jako \\
+ $(Q, \{S_i\}_{i \in Q}, \{T_i\}_{i \in Q}, \{p_i\}_{i \in Q}, u)$, kde
+\begin{itemize}
+ \item $Q$ je množina hráčů $Q = \{1,2,\dots , N\}$
+ \item $S_i, i \in Q$ jsou množiny ryzích strategií hráče $i \in Q$. Prvek prostoru $S_k$ budeme značit $s_k$
+ \item $T_i, i \in Q$ jsou množiny všech typů hráčů ve hře. Typ $t_i \in T_i$ odpovídá určité výplatní funkci, kterou může mít hráč $i$. Hráč $i$ zná svůj typ, ale nezná typy ostatních hráčů.
+ \item $P_i, i \in Q$ je množina názoru hráčů. $p_i \in P_i$ představuje názor hráče $i$ na typy ostatních hráčů.
+ \item užitková funkce $u$, která každé uspořádané dvojici $(a_i, t_i) \in S_i \times T_i $ přiřadí hodnotu z~$\mathds{R}$ pro $i \in Q$
+\end{itemize}
+\end{definition}
+Takto definovaná Bayesovská hra je tedy rozšířením strategické nekooperativní hry N hráčů o~množiny typů hráčů $T_i$ a množiny odhadů $P_i$ a s~upravenou užitkovou funkcí.
+Když volí hráč $i$  svou strategii, volí ji podle svých předpokladů o~typech protihráčů.
+Strategiemi jsou tedy myšleny dvojice $(s_i, t_i) \in T_i)$.
+Jestliže jsou množiny $Q$, $S$ a $T$ konečné, pak tuto Bayesovskou hru nazýváme \textit{konečnou}.
+
+Ryzí strategií $s_i$ hráče $i$ je v~Bayesovské hře funkce mapující hráčův typ do množiny strategií.
+$$ s_i : T_i \rightarrow S_i $$
+Pravděpodobnost rozdělení při strategii $p(t_i)$ a pravděpodobnost hraní strategie $s_i$ hráčem $i$ se bude označovat jako $p_i(s_i|t_i)$, neboli pravděpodobnost přiřazená funkcí $p$ strategii $s_i$ za předpokladu typu $t_i$.
+
+\subsection{Bayesovské Nashovo ekvilibrium}
+Ačkoliv jsou Bayesovské hry poměrně hodně odlišné od ostatních typů her v~teorii her, princip Nashova ekvilibria zůstává neměnný. 
+Abychom však mohli nadefinovat Bayesovské Nashovo ekvilibrium, musíme nejprve nadefinovat best response hráče v~Bayesovských hrách.
+K~tomu musíme ale nejprve vědět, jak vypočítat očekávaný užitek $E_t[u_i(s(t),t)]$ ze hry daného hráče $i$.
+Ten lze spočítat podle následujícího vzorce:
+$$ E_t[u_i(s(t),t)] = \sum_{t_i \in T_i}p(t_i){E_t}_{-i} [u_i(st),t|t_i)] $$
+Díky tomu, že jsme již schopni vypočítat očekávaný užitek, můžeme nyní nadefinovat best response, neboli nejlepší odpověď hráče $i$.
+\begin{definition}
+ \textbf{Best response} -- Uvažujme Bayesovskou hru, hráče $i \in Q$, konkrétní sub-profil strategií $s_{-i} \in S_{-i}$ a konkrétní sub-profil typů ${t_{-i} \in T_{-i}}$. Nejlepší odpověď hráče $i$ v~situaci $s_{-i}(t_{-i})$ je:
+
+$$BR_i(s_{-i}(t_{-i})) = arg \max_{s_i(t_i) \in S_i} E_t[u_i(s_i(t_i), s_{-i}(t_{-i}), t)]$$
+$$BR_i(s_{-i}(t_{-i})) = \sum_{t_i \in T_i} p(t_i)(arg \max_{s_i(t_i) \in S_i} {E_t}_{-i}[u_i(s_i(t_i), s_{-i}(t_{-i}), t)|t_i])  $$
+\end{definition}
+
+Nyní když máme definovánu funkci best response můžeme přikročit k~definici Bayesovského Nashova ekvilibria.
+
+\begin{definition}
+  \textbf{Bayesovské Nashovo ekvilibrium} -- je smíšený profil ${\sigma}^* = ({{\sigma}^*}_i)_{i \in N}$ takový, že pro každého hráče $i \in Q$ a pro každé $t_i \in T_i$ plat, že
+$${\sigma}^*(t_i) \in BR_i$$
+  
+\end{definition}
+
+Jelikož nyní již dokážeme spočítat užitek hráče a jsme schopni také nalézt Bayesovské Nashovo ekvilibrium, můžeme nyní přejít do další kapitoly ve které budou řešeny základní příklady Bayesovských her.
+
+\section{Příklady}
+\subsection{Cournotův model duopolu s~nekompletní informací}
+Mějme dvě firmy -- firmu 1 a firmu 2.
+U~těchto firem předpokládejme výrobu homogenních výrobků.
+Dále předpokládejme, že firmy produkují zboží s~náklady $c_1, c_2 \geq 0.$
+Užitkové funkce firmy $i$, $i \in {1, 2}$ jsou tedy:
+$$u_i(q_1, q_j) = P(q_1 + q_2)q_i - c_i q_i = [ 2 - q_1 - q_2 - c_i] q_i$$
+Pokud by byly výrobní náklady známy, řešil by se problém jako klasický Cournotův duopol.
+Nicméně předpokládejme, že:
+\begin{itemize}
+ \item Firma 1 má výrobní náklady $c_1 = 1$. Tato vlastnost je common knowlidge.
+ \item Firma 2 má výrobní náklady $c_2 = \frac{1}{2}$ s~pravděpodobností $\frac{1}{2}$ a $c_2 = \frac{3}{2}$ s~pravděpodobností $\frac{1}{2}$
+\end{itemize}
+
+Předpokládejme nyní, že $q_1$ je množství výrobků zvoleno firmou $1$.
+Optimální množství vyrobených výrobků firmy $2$ je tedy:
+
+$$ {q_2}^L = arg max [2 - q_1 - q_2 - \frac{1}{2}]q_2 = arg max[\frac{3}{2} - q_1 - q_2]q_2 $$
+
+pro $c_2 = \frac{1}{2}$ a:
+
+$$ {q_2}^H = arg max [2 - q_1 - q_2 - \frac{3}{2}]q_2 = arg max[\frac{1}{2} - q_1 - q_2]q_2 $$
+
+pro $c_2 = \frac{3}{2}$.
+
+Nyní hledáme best response firmy 2 jak pro ${q_2}^L$, tak pro ${q_2}^H$.
+Pro výpočet této hodnoty hledáne maximum těchto funkcí (postup v~\cite{bgames-hrubym}, Řešení oligopolů).
+Výsledné best response tedy jsou:
+
+$$
+{q_2}^L = \frac{\frac{3}{2} - q_1}{2}
+$$
+$$
+{q_2}^H = \frac{\frac{1}{2} - q_1}{2}
+$$
+
+Firma 1 nyní maximalizuje svůj očekávaný profit na základě vypočtených ${q_2}^L$ a ${q_2}^H$:
+\begin{align*}
+q_1({q_2}^L, {q_2}^H) &= arg max_{q_1} \frac{1}{2}[2 - q_1 - {q_2}^L - 1]q_1 + \frac{1}{2}[2 - q_1 - {q_2}^H - 1] q_1 \\
+&= arg max_{q_1} [1 - q_1 - (\frac{1}{2}{q_2}^L + \frac{1}{2}{q_2}^H)]q_1 \Rightarrow
+\end{align*}
+Pro tuto funkci budeme taktéž hledat její maximum tzn. získáme:
+$$
+q_1({q_2}^L, {q_2}^H) = \frac{1 - (\frac{1}{2} {q_2}^L + \frac{1}{2} {q_2}^H)}{2}
+$$
+Nyní přistupme k~výpočtu Nashova ekvilibria.
+
+\begin{align*}
+{q_1}^* &= q_1({q_2}^L, {q_2}^H) = \frac{2 - {q_2}^L - {q_2}^H)}{4} = \frac{2 - \frac{\frac{3}{2} - q_1}{2} - \frac{\frac{1}{2} - q_1}{2}}{4} \\
+&= \frac{2 - \frac{2 - 2q_1}{2}}{4} = \frac{2 - 1 + q_1}{4} \Leftrightarrow q_1\frac{3}{4} = \frac{1}{4} \Leftrightarrow {q_1}^* = \frac{1}{3}
+\end{align*}
+
+a pro $q_2$:
+
+\begin{align*}
+{q_2}^{*L} &= {q_2}^L({q_1}^*) = \frac{\frac{3}{2} - {q_1}^*}{2} = \frac{\frac{3}{2} - \frac{1}{3}}{2} = \frac{7}{12} \\
+{q_2}^{*H} &= {q_2}^H({q_1}^*) = \frac{\frac{1}{2} - {q_1}^*}{2} = \frac{\frac{1}{2} - \frac{1}{3}}{2} = \frac{1}{12} \\
+ &\Rightarrow \frac{1}{2}{q_2}^{*L} + \frac{1}{2}{q_2}^{*H} = \frac{7}{24} + \frac{1}{24} = \frac{1}{8} = \frac{1}{3}
+\end{align*}
+
+tzn. hledané ekvilibrium je $(\frac{1}{3}, \frac{1}{3})$
+
+\subsection{Battle of sexes s nekompletní informací}
+Předpokládejme dva hráče $1$ a $2$.
+Hráč $2$ má o hře kompletní informaci a může hrát dva typy hry -- \emph{l} a \emph{h}.
+Pokud bude hráč $2$ hrát typ \emph{l}, bude to znamenat, že má hráče $1$ rád a tudíž s ním i rád bude.
+Naopak pokud bude hrát typ \emph{h}, hráče $1$ mít rád nebude a bude preferovat nebýt s ním.
+Pravděpodobnost obou typů hry hráče $2$ je $\frac{1}{2}$.
+Hráč $1$ naopak nemá kompletní informaci o hře -- neví, zda ho má, nebo nemá hráč $2$ rád (tzn. neví, zda bude hrát variantu \emph{l}, nebo \emph{h}).
+
+Následující tabulky popisují hodnoty užitků obou hráčů pro jednotlivé typy hry:
+
+\begin{table}[h]
+	\parbox{.45\linewidth}{
+	\centering
+	\begin{tabular}{|l|c|c|}
+  		\hline                        
+  			 	   & balet & fotbal \\
+  		\hline                       
+  			balet  & (2,1) & (0,0)  \\
+  		\hline                       
+  			fotbal & (0,0) & (1,2)  \\
+  		\hline  
+	\end{tabular}
+	\caption{U2žitky pokud bude hráč $2$ hrát typ \emph{l}}
+	}
+\hfill
+	\parbox{.45\linewidth}{
+	\centering
+	\begin{tabular}{|l|c|c|}
+  		\hline                        
+  	 			   & balet & fotbal \\
+  		\hline                       
+  			balet  & (2,0) & (0,2)  \\
+  		\hline                       
+  			fotbal & (0,1) & (1,0)  \\
+  		\hline  
+	\end{tabular}
+	\caption{Užitky pokud bude hráč $2$ hrát typ \emph{h}}
+}
+\end{table}
+
+Tuto hru tedy můžeme reprezentovat jako Bayesovskou hru:
+\begin{itemize}
+	\item $Q = \{1,2\}$
+	\item $S = \{B,F\}$
+	\item $T_{1} = \{x\}$, $T_{2} = \{l,h\}$
+	\item $p_{1}(l|x) = p_{1}(h|x) = \frac{1}{2}$, $p_{2}(x|l) = p_{2}(x|h) = 1$\\
+	\item $u_{1}, u_{2}$ viz tabulky výše
+\end{itemize}
+
+Jelikož hráč $1$ má pouze jeden typ (jeho typ je common knowledge), hráč $2$ bude mít kompletní informaci o hře a bude hrát hru jako by byla klasická nekooperativní hra s kompletní informací.
+Typem hráče $1$ se tedy nadále nebudeme zabývat.
+
+Abychom nalezli Bayesovské ekvilibrium, musíme analyzovat rozhodovací problém pro všechny hráče všech typů a vytvorit asociovanou hru v normální formě s kompletní informací ekvivalentní s původní Bayesovskou hrou.
+
+Vezměme nyní kupříkladu v úvahu strategický profil $(B, (B,F))$.
+Tento profil říká, že hráč $1$ hraje strategii $B$, zatímco hráč $2$ hraje také profil $B$, nebo pokud je typu \emph{h}, tak hraje strategii $F$.
+Pro tento profil budeme nyní chtít vypočítat užitky obou hráčů, pomocí kterých následně sestavíme onu asociovanou hru z níž budeme schopni určit ekvilibria hry.
+
+Užitek hráče $1$ v profilu $(B, (B,F))$ vypočteme jako:
+$$ u_{1}(B,(B,F)) = p_{1}(l|x) * u_1(B,B) + p_{1}(h|x) * u_1(B,F) $$
+Tudíž:
+$$u_{1}(B,(B,F)) = \frac{1}{2} \cdot 2 + \frac{1}{2} * 0 = 1$$
+užitek hráče $2$ potom obdobně:
+$$u_{2}(B,(B,F)) = p_{1}(l|x) * u_2(B,B) + p_{1}(l|x) * u_2(B,F) $$
+$$u_{2}(B,(B,F)) = \frac{1}{2} \cdot 1 + \frac{1}{2} * 2 = \frac{3}{2}$$
+
+Budeme používat obdobný postup popsaný výše pro všechny zbylé profily, dokud nedostaneme následující tabulku užitků:
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|c|c|c|c|}
+  		\hline                        
+  			 	   & (B,B)               & (B,F)            & (F,B)                         & (F,F) \\
+  		\hline                       
+			B      &   \underline{2},$\frac{1}{2}$   &  \underline{1},\underline{$\frac{3}{2}$} &  \underline{1},0                          &  0,1 \\
+  		\hline                       
+  			F      &   0,$\frac{1}{2}$   &  $\frac{1}{2}$,0 &  $\frac{1}{2}$,\underline{$\frac{3}{2}$}  &  \underline{1},1 \\
+  		\hline  
+	\end{tabular}
+	\caption{Užitky hráčů pro hru převedenou na hru s kompletní informací}
+\end{table}
+
+Tato tabulka je tedy tabulka užitků hráčů 1 a 2 pro asociovanou nekooperativní hru v normální formě s kompletní informací vycházející ze zadané bayesovské hry.
+V této hře budeme standardním způsobem (stejným jako na přednáškách předmětu THE) hledat ekvilibria a získáme tak výsledek, který říká, že jediným ekvilibriem hry je profil \emph{(B, (B, F))}.
+
+\newpage
+
+\section{Závěr} \label{zaver}
+V~tomto projektu jsem se zabýval problematikou Bayesovských her, tedy her s~neúplnou informací.
+Prostudoval jsem teorii Bayesovských her z~literatury (viz níže) a vytvořil jsem kompilaci toho, co jsem se naučil.
+Definoval jsem zde Bayesovské hry, best response hráče $i$ v~situaci $s_{-i}(t_{-i})$  v~těchto hrách a Bayesovské Nashovo Ekvilibrium definující rovnovážný stav ve hrách s nekompletní informací.
+Na závěr jsem prezentoval dva řešené příklady využití Bayesovských her -- Cournotův model duopolu s neúplnou informací ve hře a hru souboj pohlaví (Battle of Sexes) s neúplnou informací ve hře.
+
+Toto téma jsem si pro svou práci zvolil především proto, že jsou aplikovatelné na reálné životní situace ve kterých nemáme kompletní informaci o "hře".
+
+\nocite{bgames}
+\nocite{bgames-hyksova}
+\nocite{bgames-ratliff}
+\nocite{bgames-chen}
+\nocite{bgames-ozdaglar}
+\nocite{bgames-ordonez}
+
+\newpage
+\bibliographystyle{czechiso}
+\bibliography{dokumentace}
+
+\end{document}
